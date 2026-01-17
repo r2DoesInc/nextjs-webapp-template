@@ -2,7 +2,7 @@
 # Docker automatically selects the correct platform based on the host
 
 # ---- Dependencies (ALL) ----
-FROM node:20-alpine AS deps
+FROM node:25-alpine AS deps
 WORKDIR /app
 
 # Install ALL dependencies (including devDependencies) for the build stage
@@ -12,7 +12,7 @@ COPY package*.json ./
 RUN npm ci --legacy-peer-deps --ignore-scripts
 
 # ---- Production Dependencies ----
-FROM node:20-alpine AS prod-deps
+FROM node:25-alpine AS prod-deps
 WORKDIR /app
 
 # Install only production dependencies for the final image
@@ -20,7 +20,7 @@ COPY package*.json ./
 RUN npm ci --legacy-peer-deps --omit=dev --ignore-scripts
 
 # ---- Prisma Generate ----
-FROM node:20-alpine AS prisma
+FROM node:25-alpine AS prisma
 WORKDIR /app
 
 COPY --from=deps /app/node_modules ./node_modules
@@ -31,7 +31,7 @@ COPY prisma ./prisma
 RUN npx prisma generate
 
 # ---- Builder ----
-FROM node:20-alpine AS builder
+FROM node:25-alpine AS builder
 WORKDIR /app
 ENV NODE_ENV=production
 # Ensure DEVELOPMENT is not set so Next.js creates standalone output
@@ -53,7 +53,7 @@ COPY . ./
 RUN npm run build
 
 # ---- Runner ----
-FROM node:20-alpine AS runner
+FROM node:25-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
